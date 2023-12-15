@@ -252,6 +252,8 @@ def main(driver, service, spreadsheet_id):
                 influencer_function(driver, influencer_links, service, spreadsheet_id)
             else:
                 print("No new influencer links found. Restarting scrolling...")
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
 
         except Exception as e:
             print(f"Error occurred: {e}")
