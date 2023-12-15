@@ -245,7 +245,6 @@ def main(driver, service, spreadsheet_id):
         try:
             print("Starting scrolling...")
             driver, influencer_links = scrolling_function(driver, max_scrolls=20, max_time=20)
-            print("Collected influencer links: ", influencer_links)
 
             if influencer_links:
                 print("Processing influencer links...")
@@ -253,7 +252,7 @@ def main(driver, service, spreadsheet_id):
             else:
                 print("No new influencer links found. Restarting scrolling...")
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
+                scrolling_function(driver, max_scrolls=20, max_time=20)
 
         except Exception as e:
             print(f"Error occurred: {e}")
