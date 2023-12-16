@@ -73,7 +73,7 @@ def style_num_to_float(value):
     else:
         return float(value)
 
-def scrolling_function(driver, max_scrolls=20, max_time=20):
+def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
     close_button_clicked = False
     scroll_count = 0
     start_time = time.time()
@@ -244,15 +244,14 @@ def main(driver, service, spreadsheet_id):
     while True:
         try:
             print("Starting scrolling...")
-            driver, influencer_links = scrolling_function(driver, max_scrolls=20, max_time=20)
+            driver, influencer_links = scrolling_function(driver, max_scrolls=2000, max_time=200000)
 
             if influencer_links:
-                print("Processing influencer links...")
-                influencer_function(driver, influencer_links, service, spreadsheet_id)
+                print("Ballsack empty!...")
             else:
                 print("No new influencer links found. Restarting scrolling...")
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                scrolling_function(driver, max_scrolls=20, max_time=20)
+                scrolling_function(driver, max_scrolls=20000, max_time=200000)
 
         except Exception as e:
             print(f"Error occurred: {e}")
