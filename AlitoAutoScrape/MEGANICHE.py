@@ -13,7 +13,6 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import time
 # from capcha import main_loop
 import re
-import time
 import os
 
 from google.oauth2.credentials import Credentials
