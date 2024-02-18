@@ -51,7 +51,7 @@ def create_service():
 
 # Use the service object
 service = create_service()
-spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
+spreadsheet_id = '1Rp7dYchjaKN4dpchToDCXNuC_4A7ZAD7cf-8gfVO3pA'
 
 # Example usage
 sheet = service.spreadsheets()
@@ -59,6 +59,25 @@ result = sheet.values().get(spreadsheetId=spreadsheet_id, range="Sheet1!A1:D5").
 rows = result.get('values', [])
 
 print(rows)
+
+def get_user_input():
+    while True:
+        choice = input("What would you like to browse today? Enter 'sound' or 'hashtag': ").strip().lower()
+        if choice in ['sound', 'hashtag']:
+            break
+        else:
+            print("Invalid input. Please enter 'sound' or 'hashtag'.")
+
+    links_or_hashtags = []
+    print(f"Enter the {choice} links/hashtags (max 100). Type 'done' when finished:")
+
+    while len(links_or_hashtags) < 100:
+        input_value = input("> ").strip()
+        if input_value.lower() == 'done':
+            break
+        links_or_hashtags.append(input_value)
+
+    return choice, links_or_hashtags
 
 def style_num_to_float(value):
     """
@@ -71,72 +90,70 @@ def style_num_to_float(value):
         return float(value.replace('K', '')) * 1000
     else:
         return float(value)
+    
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
-def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
-    close_button_clicked = False
-    scroll_count = 0
-    start_time = time.time()
-    influencer_links = []
+def new_scrolling_function(driver, choice, links_or_hashtags, service, spreadsheet_id):
+    if choice == 'sound':
+        for link in links_or_hashtags:
+            driver.get(link)
+            time.sleep(3)  # Wait for the page to load
 
-    try:
-        print('Starting scroll function')
-        while True:
-            if not close_button_clicked:
-                try:
-                    driver.refresh()  # Refresh the page to ensure starting from the top of the "For You" page
-                    time.sleep(5)  # Wait for 5 seconds to ensure the page has loaded completely
-
-                    WebDriverWait(driver, 20).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, 'div.css-1ecw34m-DivCloseWrapper'))).click()
-                    print('Found and clicked "Close" button.')
-                    close_button_clicked = True
-                except TimeoutException:
-                    print('No "Close" button found, continuing..., assuming recurrence')
-                    close_button_clicked = True
-                    driver.get("https://www.tiktok.com/foryou")
-                    driver.refresh()  # Refresh the page to ensure starting from the top of the "For You" page
-                    time.sleep(5)  # Wait for 5 seconds to ensure the page has loaded completely
-
-            while len(influencer_links) < 30 and scroll_count < max_scrolls and time.time() - start_time < max_time:
-                WebDriverWait(driver, 2).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-14bp9b0-DivItemContainer')))
-                print('Video containers found')
-
-                video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-14bp9b0-DivItemContainer')            
-                for container in video_containers:
+            influencer_links = []
+            try:
+                for _ in range(100):  # Repeat process 100 times
                     try:
-                        anchor = container.find_element(By.CSS_SELECTOR, 'a.avatar-anchor')
-                        influ_url_full = anchor.get_attribute('href').split('?')[0]
+                        music_items = WebDriverWait(driver, 10).until(
+                            EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div[data-e2e="music-item"]'))
+                        )
 
-                        if len(influ_url_full.split('/')) >= 4:
-                            influ_url = '/'.join(influ_url_full.split('/')[:4]) + '/'
+                        if len(music_items) >= 2:
+                            second_item = music_items[1]
+                            driver.execute_script("arguments[0].click();", second_item)
+                            time.sleep(2)
+
+                            try:
+                                anchor_element = WebDriverWait(driver, 10).until(
+                                    EC.presence_of_element_located((By.CSS_SELECTOR, 'a[data-e2e="browse-user-avatar"]'))
+                                )
+                                influencer_link = anchor_element.get_attribute('href')
+                                if influencer_link and influencer_link not in influencer_links:
+                                    influencer_links.append(influencer_link)
+                                    print("Influencer link:", influencer_link)
+                            except TimeoutException:
+                                print("Unable to find the influencer link in the new content.")
+
                         else:
-                            influ_url = influ_url_full
-                        
-                        if influ_url not in influencer_links:
-                            influencer_links.append(influ_url)
-                            print("Found influencer URL:", influ_url)
+                            print("Not enough music items found.")
+
                     except NoSuchElementException:
-                        print("No 'avatar-anchor' link found in this item.")
+                        print("Music items not found on the page.")
 
-                time.sleep(1)
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                time.sleep(5)
-                scroll_count += 1
+                    try:
+                        next_button = WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-e2e="arrow-right"]'))
+                        )
+                        next_button.click()
+                        time.sleep(3)
+                    except TimeoutException:
+                        print("Next button not found or not clickable. Moving to the next link.")
+                        break
 
-            if len(influencer_links) >= 7:
-                print(f"{len(influencer_links)} Influencer Links have been collected, executing influencer_function.")
-                spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
+            except TimeoutException:
+                print("An error occurred while navigating through videos.")
+
+            if influencer_links:
                 influencer_function(driver, influencer_links, service, spreadsheet_id)
-                break
-            elif scroll_count >= max_scrolls or time.time() - start_time >= max_time:
-                print("Maximum scrolls or time reached without collecting enough links.")
-                break
 
-    except Exception as e:
-        print(f'Error occurred in scrolling function: {e}')
+    return influencer_links
 
-    return driver, influencer_links
 
+    # Add logic for 'hashtag' choice if required
+    # ...
 
 ### average view grabber
 def fetch_tiktok_data(link):
@@ -163,7 +180,7 @@ def fetch_tiktok_data(link):
     return item
 
 service = create_service()
-spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'  # Replace with your actual spreadsheet ID
+spreadsheet_id = '1Rp7dYchjaKN4dpchToDCXNuC_4A7ZAD7cf-8gfVO3pA'  # Replace with your actual spreadsheet ID
 
 def influencer_function(driver, links, service, spreadsheet_id):
     service = create_service()
@@ -199,37 +216,23 @@ def influencer_function(driver, links, service, spreadsheet_id):
             average_views = sum(video_views) / len(video_views) if video_views else None
             fe = style_num_to_float(followers_text)
 
-            # Extract email(s) from userbio_text
-            emails = re.findall(r'[\w.+-]+@[\w-]+\.[\w.-]+', userbio_text)
-            email_text = ' , '.join(emails)
-
-            # Initialize email and extension to empty if no email is found
-            email_username = ''
-            email_extension = ''
-            aggregate_email = ''
-
-
-            # If emails are found, split the first email into username and extension
-            if emails:
-                cleaned_email = emails[0].lstrip('-')
-                email_parts = emails[0].split('@')
-                email_username = email_parts[0]
-                email_extension = email_parts[1] if len(email_parts) > 1 else ''
-                aggregate_email = cleaned_email # Use the original email
-
             item = {
                 'url': driver.current_url,
                 'name': name_text,
-                'followers': fe,
-                'email': email_username,
-                'extension': email_extension,
+                'followers': followers_text,
+                'email': ' , '.join(re.findall(r'[\w.+-]+@[\w-]+\.[\w.-]+', userbio_text)),
+                'a' : '',
+                'b' : '',
                 'likes': likes_text,
+                'x' : '',
+                'y' : '',
+                'z' : '',
                 'Average Views': average_views,
                 'Alito Ratio': average_views / fe if average_views and fe else None,
-                'date': date.today().strftime('%Y-%m-%d'),
-                'Aggregate': aggregate_email
+                'q' : '',
+                'v' : '',
+                'date': date.today().strftime('%Y-%m-%d')
             }
-
 
             if item not in list_items:
                 list_items.append(item)
@@ -241,75 +244,61 @@ def influencer_function(driver, links, service, spreadsheet_id):
             print(f"Error processing page {page}: {e}")
 
     if list_items:  # Check if list_items is not empty
-        # Read the existing data to find the next empty row in column A
-        result = service.spreadsheets().values().get(
-            spreadsheetId=spreadsheet_id,
-            range='Raw!A:A').execute()
-        values = result.get('values', [])
-
-        # Find the first empty row (assuming column A contains data for each entry)
-        next_empty_row = len(values) + 1
-
-        # Set the range to start appending from the next empty row
-        append_range = f'Raw!A{next_empty_row}'
-
-        # Prepare the data to be appended
-        append_values = [[item[key] for key in item] for item in list_items]
-        body = {'values': append_values}
-
-        # Append the data
+        values = [[item[key] for key in item] for item in list_items]
+        body = {'values': values}
         service.spreadsheets().values().append(
-            spreadsheetId=spreadsheet_id,
-            range=append_range,
-            valueInputOption='USER_ENTERED',
-            body=body).execute()
+            spreadsheetId=spreadsheet_id, range='Raw',
+            valueInputOption='USER_ENTERED', body=body).execute()
 
-        # Convert list_items to a DataFrame
         df_new = pd.DataFrame(list_items)
         try:
-            # Concatenate with existing DataFrame and remove duplicates
             final_df = pd.concat([df, df_new]).drop_duplicates(subset=['url'])
         except:
-            # If concatenation fails, use the new DataFrame as the final DataFrame
             final_df = df_new
-
-        # Save the final DataFrame to a CSV file
         final_df.to_csv(csv_file, index=False)
         print("Appended to sheet and CSV!")
+
     else:
         print("No new items to append.")
 
+def main(driver, service, spreadsheet_id, choice, links_or_hashtags):
+    print("WebDriver started and navigating...")
+    for link in links_or_hashtags:
+        driver.get(link)
+        print(f"Navigated to {link}")
 
-def main(driver, service, spreadsheet_id):
     while True:
         try:
             print("Starting scrolling...")
-            driver, influencer_links = scrolling_function(driver, max_scrolls=2000, max_time=200000)
+            new_scrolling_function(driver, choice, [link], service, spreadsheet_id)
+            influencer_links = new_scrolling_function(driver, choice, [link], service, spreadsheet_id)
 
             if influencer_links:
                 print("Ballsack empty!...")
             else:
                 print("No new influencer links found. Restarting scrolling...")
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                scrolling_function(driver, max_scrolls=20000, max_time=200000)
-
+            
         except Exception as e:
             print(f"Error occurred: {e}")
             break  # Optional: Remove this line if you want the loop to continue even after an error 
-          
+        finally:
+            driver.quit()
+            print("WebDriver closed.")
+
 if __name__=="__main__":
+    choice, links_or_hashtags = get_user_input()
+
     print("Starting script...")
     options = webdriver.ChromeOptions()
+    # [Your existing WebDriver configuration options]
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(options=options)
-    driver.get("https://www.tiktok.com/foryou")
-    print("WebDriver started and navigated to TikTok.")
 
     service = create_service()
-    spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
-    main(driver, service, spreadsheet_id)
+    spreadsheet_id = '1Rp7dYchjaKN4dpchToDCXNuC_4A7ZAD7cf-8gfVO3pA'
+    main(driver, service, spreadsheet_id, choice, links_or_hashtags)
 
     driver.quit()
     print("WebDriver closed.")
