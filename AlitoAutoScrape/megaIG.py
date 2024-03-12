@@ -59,14 +59,17 @@ spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
 def style_num_to_float(value):
     """
     Convert string number with style to a float.
-    For example, '3.1M' becomes 3100000.0, '5K' becomes 5000.0.
+    Removes commas before conversion.
+    For example, '3.1M' becomes 3100000.0, '5K' becomes 5000.0, and '6,437' becomes 6437.0.
     """
+    value = value.replace(',', '')  # Remove commas
     if 'M' in value:
         return float(value.replace('M', '')) * 1000000
     elif 'K' in value:
         return float(value.replace('K', '')) * 1000
     else:
         return float(value)
+
 
 # Scrolling function adapted for Instagram (Placeholder - Implement scrolling and data collection for Instagram Reels)
 def double_click_videos(driver, max_attempts=12):
@@ -232,6 +235,9 @@ def influencer_function(driver, links, service, spreadsheet_id):
         except Exception as e:
             print(f"Error processing page {page}: {e}")
 
+        finally:
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
 
     if list_items:  # Check if list_items is not empty
             # Read the existing data to find the next empty row in column A
