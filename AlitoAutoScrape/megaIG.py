@@ -234,7 +234,7 @@ def influencer_function(driver, links, service, spreadsheet_id):
         except Exception as e:
             print(f"Error processing page {page}: {e}")
  
-   
+    
     if list_items:  # Check if list_items is not empty
             # Read the existing data to find the next empty row in column A
             result = service.spreadsheets().values().get(
@@ -271,7 +271,10 @@ def influencer_function(driver, links, service, spreadsheet_id):
             # Save the final DataFrame to a CSV file
             final_df.to_csv(csv_file, index=False)
             print("Appended to sheet and CSV!")
-
+    
+    driver = webdriver.Chrome(options=options)  # Reinitialize the webdriver.
+    driver.get("https://www.instagram.com/reels")  # Open a new window directed to Instagram Reels.
+    
 # Main function adapted for Instagram
 def main(driver):
     print("Collecting influencer links...")
@@ -295,7 +298,7 @@ if __name__ == "__main__":
     try:
         while True:  # Start an infinite loop
             main(driver)
-            time.sleep(10)  # Optional: Wait for 10 seconds or any time you deem necessary before restarting the main function
+            time.sleep(5)  # Optional: Wait for 10 seconds or any time you deem necessary before restarting the main function
     except KeyboardInterrupt:
         print("Script interrupted by user. Closing WebDriver.")
         driver.quit()
