@@ -160,14 +160,12 @@ def influencer_function(driver, links, service, spreadsheet_id):
     range_name = 'Raw'
     csv_file = 'MEGANICHE_Data.csv'
     
-    # Your existing code for handling the CSV file continues here...
-
     for page in links:
         print("Opening link: ", page)
-        driver.execute_script("window.open('{}');".format(page))
-        time.sleep(5)
+        driver.execute_script("window.open(arguments[0]);", page)
         driver.switch_to.window(driver.window_handles[-1])
-        
+        time.sleep(5)  # Adjust timing as necessary
+
         try:
             # Adjusted selectors based on Instagram's HTML structure for Reels
             # Extracting bio information
@@ -231,14 +229,12 @@ def influencer_function(driver, links, service, spreadsheet_id):
 
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-
+            time.sleep(2)  # Adjust timing as necessary
+        
         except Exception as e:
             print(f"Error processing page {page}: {e}")
-
-        finally:
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-
+ 
+   
     if list_items:  # Check if list_items is not empty
             # Read the existing data to find the next empty row in column A
             result = service.spreadsheets().values().get(
