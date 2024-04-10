@@ -51,7 +51,7 @@ def create_service():
 
 # Use the service object
 service = create_service()
-spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
+spreadsheet_id = '1BntpUcd5HUi1LaWX6F_DVv__me53qp_xBflOOHxRxZQ'
 
 # Example usage
 sheet = service.spreadsheets()
@@ -163,7 +163,7 @@ def fetch_tiktok_data(link):
     return item
 
 service = create_service()
-spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'  # Replace with your actual spreadsheet ID
+spreadsheet_id = '1BntpUcd5HUi1LaWX6F_DVv__me53qp_xBflOOHxRxZQ'  # Replace with your actual spreadsheet ID
 
 def influencer_function(driver, links, service, spreadsheet_id):
     service = create_service()
