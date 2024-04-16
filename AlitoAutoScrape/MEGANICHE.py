@@ -125,7 +125,7 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
 
             if len(influencer_links) >= 7:
                 print(f"{len(influencer_links)} Influencer Links have been collected, executing influencer_function.")
-                spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
+                spreadsheet_id = '1BntpUcd5HUi1LaWX6F_DVv__me53qp_xBflOOHxRxZQ'
                 influencer_function(driver, influencer_links, service, spreadsheet_id)
                 break
             elif scroll_count >= max_scrolls or time.time() - start_time >= max_time:
