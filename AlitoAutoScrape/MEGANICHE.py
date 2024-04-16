@@ -51,7 +51,7 @@ def create_service():
 
 # Use the service object
 service = create_service()
-spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
+spreadsheet_id = '1BntpUcd5HUi1LaWX6F_DVv__me53qp_xBflOOHxRxZQ'
 
 # Example usage
 sheet = service.spreadsheets()
@@ -308,7 +308,7 @@ if __name__=="__main__":
     print("WebDriver started and navigated to TikTok.")
 
     service = create_service()
-    spreadsheet_id = '1olH8cna9cJjtoUeJS9iNVmJBTQ7FNWhzX7wzzWvpUXo'
+    spreadsheet_id = '1BntpUcd5HUi1LaWX6F_DVv__me53qp_xBflOOHxRxZQ'
     main(driver, service, spreadsheet_id)
 
     driver.quit()
