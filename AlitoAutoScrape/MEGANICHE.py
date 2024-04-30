@@ -81,27 +81,16 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
     try:
         print('Starting scroll function')
         while True:
-            if not close_button_clicked:
-                try:
-                    driver.refresh()  # Refresh the page to ensure starting from the top of the "For You" page
-                    time.sleep(5)  # Wait for 5 seconds to ensure the page has loaded completely
-
-                    WebDriverWait(driver, 20).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, 'div.css-1ecw34m-DivCloseWrapper'))).click()
-                    print('Found and clicked "Close" button.')
-                    close_button_clicked = True
-                except TimeoutException:
-                    print('No "Close" button found, continuing..., assuming recurrence')
-                    close_button_clicked = True
-                    driver.get("https://www.tiktok.com/foryou")
-                    driver.refresh()  # Refresh the page to ensure starting from the top of the "For You" page
-                    time.sleep(5)  # Wait for 5 seconds to ensure the page has loaded completely
-
+           
             while len(influencer_links) < 30 and scroll_count < max_scrolls and time.time() - start_time < max_time:
-                WebDriverWait(driver, 2).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-14bp9b0-DivItemContainer')))
-                print('Video containers found')
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-                video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-14bp9b0-DivItemContainer')            
+                WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-1l0odge-DivContentContainer')))
+                print('Video containers found')
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+                video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')            
                 for container in video_containers:
                     try:
                         anchor = container.find_element(By.CSS_SELECTOR, 'a.avatar-anchor')
