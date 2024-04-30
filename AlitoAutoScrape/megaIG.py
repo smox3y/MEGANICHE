@@ -80,7 +80,7 @@ def double_click_videos(driver, max_attempts=12):
         for video_container in video_containers:
             # Perform a double-click action on the video element
             ActionChains(driver).double_click(video_container).perform()
-            time.sleep(1)  # Wait a bit for any potential response
+            time.sleep(2)  # Wait a bit for any potential response
 
         attempts += 1
         print(f"Double-clicked on videos, attempt {attempts}")
@@ -99,7 +99,7 @@ def scrolling_function(driver, target_link_count=30, max_scroll_attempts=100):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
             # Wait to load the page
-            time.sleep(2)
+            time.sleep(3)
 
             # Find all video containers on the page
             video_containers = driver.find_elements(By.CSS_SELECTOR, 'div[class*="x78zum5"] video')
@@ -111,7 +111,7 @@ def scrolling_function(driver, target_link_count=30, max_scroll_attempts=100):
                     ActionChains(driver).double_click(video_container).perform()
                     video_seen.add(video_src)
                     # Wait 2 seconds to allow for the page to properly load after double-clicking
-                    time.sleep(2)
+                    time.sleep(3)
 
             # Calculate new scroll height and compare with last scroll height
             new_height = driver.execute_script("return document.body.scrollHeight")
@@ -229,11 +229,14 @@ def influencer_function(driver, links, service, spreadsheet_id):
 
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-            time.sleep(2)  # Adjust timing as necessary
+            time.sleep(3)  # Adjust timing as necessary
         
         except Exception as e:
             print(f"Error processing page {page}: {e}")
- 
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            time.sleep(4)  # Adjust timing as necessary
+
     
     if list_items:  # Check if list_items is not empty
             # Read the existing data to find the next empty row in column A
