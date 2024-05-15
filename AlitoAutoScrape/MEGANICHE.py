@@ -265,6 +265,8 @@ def influencer_function(driver, links, service, spreadsheet_id):
         # Save the final DataFrame to a CSV file
         final_df.to_csv(csv_file, index=False)
         print("Appended to sheet and CSV!")
+        driver.get("https://www.tiktok.com/foryou")
+
     else:
         print("No new items to append.")
 

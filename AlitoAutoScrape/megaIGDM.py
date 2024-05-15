@@ -33,6 +33,8 @@ def create_service():
 MESSAGE_BUTTON_SELECTOR = 'div[role="button"][tabindex="0"]'  # Assuming the 'Message' button can be uniquely identified like this.
 TEXT_BOX_SELECTOR = 'div[aria-label="Message"][contenteditable="true"]'
 SEND_BUTTON_SELECTOR = "//div[@role='button'][@tabindex='0' and text()='Send']"
+
+
 message_to_send = ("Hey! We would love to work with you for paid collaborations with your content. "
                    "What do you typically charge? And what sorts of brands do you typically work with?"
                    "If you already work with someone from our team, let us know.")
