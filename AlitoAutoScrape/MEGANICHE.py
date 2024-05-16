@@ -85,7 +85,7 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
             while len(influencer_links) < 30 and scroll_count < max_scrolls and time.time() - start_time < max_time:
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-                WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-cvt9sw-DivContentContainer')))
+                WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-ux6hkr-DivTextInfoContainer')))
                 print('Video containers found')
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
