@@ -1,3 +1,5 @@
+#meganiche.py
+
 from datetime import date, datetime
 from selenium import webdriver
 import pandas as pd
@@ -28,6 +30,8 @@ def add_creator(creator_data):
         print("Failed to add creator. Response:", response.text)
 
 def style_num_to_float(value):
+    if 'B' in value:
+        return float(value.replace('B', '')) * 1000000000
     if 'M' in value:
         return float(value.replace('M', '')) * 1000000
     elif 'K' in value:
