@@ -92,7 +92,7 @@ def influencer_function(driver, links):
         driver.switch_to.window(driver.window_handles[-1])
         
         try:
-            userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-4ac4gk-H2ShareDesc')
+            userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-1s5lw4c-H2ShareDesc ')
             userbio_text = userbio_element.text
             name_element = driver.find_element(By.CSS_SELECTOR, '.css-1nbnul7-DivShareTitleContainer .css-10pb43i-H2ShareSubTitle')
             name_text = name_element.text
