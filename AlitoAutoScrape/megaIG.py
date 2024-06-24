@@ -97,7 +97,7 @@ def influencer_function(driver, links):
         try:
             name_element = driver.find_element(By.CSS_SELECTOR, 'h2[class*="x1lliihq"]')
             page_name = name_element.text
-            bio_element = driver.find_element(By.CSS_SELECTOR, 'h1[class*="_ap3a _aaco"]')
+            bio_element = driver.find_element(By.CSS_SELECTOR, 'span[class*="_ap3a _aaco _aacu _aacx _aad7 _aade"]')
             bio_text = bio_element.text
             followers_element = driver.find_element(By.CSS_SELECTOR, 'a[href*="/followers/"] span')
             followers_text = followers_element.text
@@ -133,6 +133,8 @@ def influencer_function(driver, links):
 
         except Exception as e:
             print(f"Error processing page {page}: {e}")
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
 
 # Main function
 def main(driver):

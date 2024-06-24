@@ -48,11 +48,11 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
         print('Starting scroll function')
         while len(influencer_links) < 30 and scroll_count < max_scrolls and time.time() - start_time < max_time:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-ux6hkr-DivTextInfoContainer')))
+            WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')))
             video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')
             for container in video_containers:
                 try:
-                    anchor = container.find_element(By.CSS_SELECTOR, 'a.avatar-anchor')
+                    anchor = container.find_element(By.CSS_SELECTOR, 'a.e1g2yhv81.css-fz9tz3-StyledLink-StyledAuthorAnchor.er1vbsz0')
                     influ_url_full = anchor.get_attribute('href').split('?')[0]
                     influ_url = '/'.join(influ_url_full.split('/')[:4]) + '/' if len(influ_url_full.split('/')) >= 4 else influ_url_full
                     if influ_url not in influencer_links:
@@ -72,6 +72,7 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
     except Exception as e:
         print(f'Error occurred in scrolling function: {e}')
     return driver, influencer_links
+
 
 def fetch_tiktok_data(link):
     response = requests.get(link)
