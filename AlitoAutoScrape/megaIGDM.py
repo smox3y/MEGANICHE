@@ -1,6 +1,6 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 import time
+import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
 import requests
 import re
 
@@ -26,8 +26,11 @@ def fetch_instagram_creators():
         return []
 
 # Function to update creator status to "DM"
-def update_creator_status(creator_id, status):
-    response = requests.post('https://blitz-backend-nine.vercel.app/crm/creator/update', json={'id': creator_id, 'status': status})
+def update_creator_status(creator_id, status, link=None):
+    data = {'id': creator_id, 'status': status}
+    if link:
+        data['link'] = link
+    response = requests.post('https://blitz-backend-nine.vercel.app/crm/creator/update', json=data)
     if response.status_code == 200:
         print(f"Creator ID {creator_id} status updated to {status}")
     else:
@@ -71,7 +74,7 @@ def send_dms(driver, instagram_creators):
                 time.sleep(1)  # Wait for the message to be sent
 
                 # Update the creator status to "DM"
-                update_creator_status(creator_id, "DM")
+                update_creator_status(creator_id, "DM", link)
 
                 print(f"Message successfully sent for {link}")
             else:
@@ -89,9 +92,19 @@ def main(driver):
 
 if __name__ == "__main__":
     print("Starting script...")
-    options = webdriver.ChromeOptions()
-    # Add any required Chrome options
-    driver = webdriver.Chrome(options=options)
+    options = uc.ChromeOptions()
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1280,800")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+
+    driver = uc.Chrome(options=options)
     driver.get("https://www.instagram.com/")  # Navigate to Instagram
 
     # Allow time to input credentials

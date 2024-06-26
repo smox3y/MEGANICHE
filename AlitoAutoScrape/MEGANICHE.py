@@ -1,18 +1,21 @@
 #meganiche.py
 
-from datetime import date, datetime
-from selenium import webdriver
+import time
+import random
+import logging
+import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
+from datetime import date
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-import time
 import re
 import os
 
+# Function to fetch creators
 def fetch_creators():
     response = requests.get('https://blitz-backend-nine.vercel.app/crm/creator/creators')
     if response.status_code == 200:
@@ -21,6 +24,7 @@ def fetch_creators():
         print("Failed to fetch creators")
         return []
 
+# Function to add creator
 def add_creator(creator_data):
     print("Attempting to add creator with data:", creator_data)  # Log the request data
     response = requests.post('https://blitz-backend-nine.vercel.app/crm/creator/add', json=creator_data)
@@ -29,6 +33,7 @@ def add_creator(creator_data):
     else:
         print("Failed to add creator. Response:", response.text)
 
+# Function to convert styled numbers to float
 def style_num_to_float(value):
     if 'B' in value:
         return float(value.replace('B', '')) * 1000000000
@@ -39,6 +44,7 @@ def style_num_to_float(value):
     else:
         return float(value)
 
+# Scrolling function to collect influencer links
 def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
     scroll_count = 0
     start_time = time.time()
@@ -73,7 +79,7 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
         print(f'Error occurred in scrolling function: {e}')
     return driver, influencer_links
 
-
+# Function to fetch TikTok data
 def fetch_tiktok_data(link):
     response = requests.get(link)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -82,6 +88,7 @@ def fetch_tiktok_data(link):
     average_views = sum(view_counts) / len(view_counts) if view_counts else None
     return {'Average Views': average_views}
 
+# Function to process influencers
 def influencer_function(driver, links):
     list_items = []
     creators = fetch_creators()
@@ -93,7 +100,7 @@ def influencer_function(driver, links):
         driver.switch_to.window(driver.window_handles[-1])
         
         try:
-            userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-1s5lw4c-H2ShareDesc ')
+            userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-4ac4gk-H2ShareDesc')
             userbio_text = userbio_element.text
             name_element = driver.find_element(By.CSS_SELECTOR, '.css-1nbnul7-DivShareTitleContainer .css-10pb43i-H2ShareSubTitle')
             name_text = name_element.text
@@ -144,6 +151,7 @@ def influencer_function(driver, links):
     else:
         print("No new items to append.")
 
+# Main function
 def main(driver):
     while True:
         try:
@@ -159,13 +167,23 @@ def main(driver):
             print(f"Error occurred: {e}")
             break
 
+# Start the script
 if __name__ == "__main__":
     print("Starting script...")
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option('useAutomationExtension', False)
+    options = uc.ChromeOptions()
     options.add_argument("--disable-blink-features=AutomationControlled")
-    driver = webdriver.Chrome(options=options)
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1280,800")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    options.add_argument("--headless=new")  # Run in headless mode
+
+    driver = uc.Chrome(options=options)
     driver.get("https://www.tiktok.com/foryou")
     print("WebDriver started and navigated to TikTok.")
 

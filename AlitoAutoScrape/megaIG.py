@@ -1,12 +1,12 @@
-from datetime import date
-from selenium import webdriver
-import requests
-from bs4 import BeautifulSoup
+import time
+import logging
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-import time
+from datetime import date
+import requests
+from bs4 import BeautifulSoup
 import re
 
 # Function to fetch existing creators from BlitzPay
@@ -37,7 +37,6 @@ def style_num_to_float(value):
         return float(value.replace('K', '')) * 1000
     else:
         return float(value)
-
 
 # Function to scroll and collect Instagram influencer links
 def scrolling_function(driver, target_link_count=30, max_scroll_attempts=100):
@@ -148,10 +147,23 @@ def main(driver):
     else:
         print("Insufficient links collected. Consider increasing scroll attempts or checking the CSS selectors.")
 
+# Start the script
 if __name__ == "__main__":
     print("Starting script...")
-    options = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(options=options)
+    options = uc.ChromeOptions()
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1280,800")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+   # options.add_argument("--headless=new")  # Run in headless mode
+
+    driver = uc.Chrome(options=options)
     driver.get("https://www.instagram.com/reels")
     print("WebDriver started and navigated to Instagram Reels.")
 
