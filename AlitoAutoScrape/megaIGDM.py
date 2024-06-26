@@ -13,19 +13,20 @@ MESSAGE_TO_SEND = (
     "What do you typically charge? And what sorts of brands do you typically work with? "
     "If you already work with someone from our team, let us know."
 )
+SENT_MESSAGE_SELECTOR = f"span.x1lliihq.x193iq5w.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft"
 
 # Function to fetch creators with "instagram.com" in their link and status is "cold"
 def fetch_instagram_creators():
     response = requests.get('https://blitz-backend-nine.vercel.app/crm/creator/creators')
     if response.status_code == 200:
         creators = response.json()
-        instagram_creators = [creator for creator in creators if 'instagram.com' in creator['link'] and creator['status'] == 'cold']
+        instagram_creators = [creator for creator in creators if 'instagram.com' in creator['link'] and creator['status'] not in ('IGMDM', 'OTHER', 'DM')]
         return instagram_creators
     else:
         print("Failed to fetch creators")
         return []
 
-# Function to update creator status to "DM"
+# Function to update creator status
 def update_creator_status(creator_id, status, link=None):
     data = {'id': creator_id, 'status': status}
     if link:
@@ -44,6 +45,19 @@ def send_dms(driver, instagram_creators):
             creator_id = creator['id']
             driver.get(link)
             time.sleep(8)  # Allow time for the page to load
+
+            # Check if the message was already sent
+            try:
+                sent_message_elements = driver.find_elements(By.CSS_SELECTOR, SENT_MESSAGE_SELECTOR)
+                for element in sent_message_elements:
+                    if MESSAGE_TO_SEND in element.text:
+                        print(f"Message already sent for {link}")
+                        update_creator_status(creator_id, "DM", link)
+                        break
+                else:
+                    raise Exception("No matching message found")
+            except Exception as e:
+                print(f"No previous message found: {e}")
 
             # Attempt to find and click the 'Message' button
             found_message_button = False
