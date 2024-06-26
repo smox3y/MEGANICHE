@@ -27,8 +27,8 @@ def fetch_instagram_creators():
         return []
 
 # Function to update creator status
-def update_creator_status(creator_id, status, link=None):
-    data = {'id': creator_id, 'status': status}
+def update_creator_status(creator_id, status, username, link=None):
+    data = {'id': creator_id, 'status': status, 'username': username}
     if link:
         data['link'] = link
     response = requests.post('https://blitz-backend-nine.vercel.app/crm/creator/update', json=data)
@@ -43,6 +43,7 @@ def send_dms(driver, instagram_creators):
         try:
             link = creator['link']
             creator_id = creator['id']
+            username = creator['username']
             driver.get(link)
             time.sleep(8)  # Allow time for the page to load
 
@@ -88,7 +89,7 @@ def send_dms(driver, instagram_creators):
                 time.sleep(1)  # Wait for the message to be sent
 
                 # Update the creator status to "DM"
-                update_creator_status(creator_id, "DM", link)
+                update_creator_status(creator_id, "DM",username, link)
 
                 print(f"Message successfully sent for {link}")
             else:
