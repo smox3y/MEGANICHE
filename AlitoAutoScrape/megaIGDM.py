@@ -2,7 +2,6 @@ import time
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 import requests
-import re
 
 # Instagram message details
 MESSAGE_BUTTON_SELECTOR = 'div[role="button"][tabindex="0"]'
@@ -13,14 +12,14 @@ MESSAGE_TO_SEND = (
     "What do you typically charge? And what sorts of brands do you typically work with? "
     "If you already work with someone from our team, let us know."
 )
-SENT_MESSAGE_SELECTOR = f"span.x1lliihq.x193iq5w.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft"
+SENT_MESSAGE_SELECTOR = 'span.x1lliihq.x193iq5w.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft'
 
-# Function to fetch creators with "instagram.com" in their link and status is "cold"
+# Function to fetch creators with "instagram.com" in their link and status not "IGDM"
 def fetch_instagram_creators():
     response = requests.get('https://blitz-backend-nine.vercel.app/crm/creator/creators')
     if response.status_code == 200:
         creators = response.json()
-        instagram_creators = [creator for creator in creators if 'instagram.com' in creator['link'] and creator['status'] not in ('IGMDM', 'OTHER', 'DM')]
+        instagram_creators = [creator for creator in creators if 'instagram.com' in creator['link'] and creator['status'] != 'IGDM']
         return instagram_creators
     else:
         print("Failed to fetch creators")
@@ -47,19 +46,6 @@ def send_dms(driver, instagram_creators):
             driver.get(link)
             time.sleep(8)  # Allow time for the page to load
 
-            # Check if the message was already sent
-            try:
-                sent_message_elements = driver.find_elements(By.CSS_SELECTOR, SENT_MESSAGE_SELECTOR)
-                for element in sent_message_elements:
-                    if MESSAGE_TO_SEND in element.text:
-                        print(f"Message already sent for {link}")
-                        update_creator_status(creator_id, "DM", link)
-                        break
-                else:
-                    raise Exception("No matching message found")
-            except Exception as e:
-                print(f"No previous message found: {e}")
-
             # Attempt to find and click the 'Message' button
             found_message_button = False
             buttons = driver.find_elements(By.XPATH, "//div[@role='button']")
@@ -67,8 +53,25 @@ def send_dms(driver, instagram_creators):
                 if 'Message' in button.text:
                     button.click()
                     found_message_button = True
-                    time.sleep(4)  # Ensure the message dialog is fully loaded
+                    time.sleep(8)  # Ensure the message dialog is fully loaded
                     break
+
+            if not found_message_button:
+                print(f"'Message' button not found for {link}")
+                continue
+
+            # Check if the message was already sent
+            try:
+                sent_message_elements = driver.find_elements(By.CSS_SELECTOR, SENT_MESSAGE_SELECTOR)
+                for element in sent_message_elements:
+                    if MESSAGE_TO_SEND in element.text:
+                        print(f"Message already sent for {link}")
+                        update_creator_status(creator_id, "IGDM", username, link)
+                        break
+                else:
+                    print(f"No matching message found for {link}")
+            except Exception as e:
+                print(f"No previous message found: {e}")
 
             try:
                 not_now_button = driver.find_element(By.XPATH, "//button[text()='Not Now']")
@@ -79,21 +82,18 @@ def send_dms(driver, instagram_creators):
                 print("No 'Not Now' popup found or error dismissing it:", popup_exception)
 
             # If 'Message' button was found and clicked, proceed to send a message
-            if found_message_button:
-                text_box = driver.find_element(By.CSS_SELECTOR, TEXT_BOX_SELECTOR)
-                text_box.send_keys(MESSAGE_TO_SEND)
-                time.sleep(4)  # Ensure the message is properly typed
+            text_box = driver.find_element(By.CSS_SELECTOR, TEXT_BOX_SELECTOR)
+            text_box.send_keys(MESSAGE_TO_SEND)
+            time.sleep(4)  # Ensure the message is properly typed
 
-                send_button = driver.find_element(By.XPATH, SEND_BUTTON_SELECTOR)
-                send_button.click()
-                time.sleep(1)  # Wait for the message to be sent
+            send_button = driver.find_element(By.XPATH, SEND_BUTTON_SELECTOR)
+            send_button.click()
+            time.sleep(1)  # Wait for the message to be sent
 
-                # Update the creator status to "DM"
-                update_creator_status(creator_id, "DM",username, link)
+            # Update the creator status to "DM"
+            update_creator_status(creator_id, "DM", username, link)
 
-                print(f"Message successfully sent for {link}")
-            else:
-                print(f"'Message' button not found for {link}")
+            print(f"Message successfully sent for {link}")
         except Exception as e:
             print(f"An error occurred while processing {link}: {e}")
 
