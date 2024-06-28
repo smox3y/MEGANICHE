@@ -44,7 +44,7 @@ def send_dms(driver, instagram_creators):
             creator_id = creator['id']
             username = creator['username']
             driver.get(link)
-            time.sleep(8)  # Allow time for the page to load
+            time.sleep(12)  # Allow time for the page to load
 
             # Attempt to find and click the 'Message' button
             found_message_button = False
@@ -53,8 +53,23 @@ def send_dms(driver, instagram_creators):
                 if 'Message' in button.text:
                     button.click()
                     found_message_button = True
-                    time.sleep(8)  # Ensure the message dialog is fully loaded
+                    time.sleep(12)  # Ensure the message dialog is fully loaded
+                    driver.refresh()
+                    time.sleep(12)  # Allow time for the page to reload after refresh
                     break
+
+            if not found_message_button:
+                driver.refresh()
+                time.sleep(12)  # Wait for the page to reload
+                buttons = driver.find_elements(By.XPATH, "//div[@role='button']")
+                for button in buttons:
+                    if 'Message' in button.text:
+                        button.click()
+                        found_message_button = True
+                        time.sleep(12)  # Ensure the message dialog is fully loaded
+                        driver.refresh()
+                        time.sleep(12)  # Allow time for the page to reload after refresh
+                        break
 
             if not found_message_button:
                 print(f"'Message' button not found for {link}")
@@ -77,18 +92,18 @@ def send_dms(driver, instagram_creators):
                 not_now_button = driver.find_element(By.XPATH, "//button[text()='Not Now']")
                 not_now_button.click()
                 print("Dismissed 'Not Now' popup.")
-                time.sleep(5)  # Allow time for the popup to be dismissed
+                time.sleep(9)  # Allow time for the popup to be dismissed
             except Exception as popup_exception:
                 print("No 'Not Now' popup found or error dismissing it:", popup_exception)
 
             # If 'Message' button was found and clicked, proceed to send a message
             text_box = driver.find_element(By.CSS_SELECTOR, TEXT_BOX_SELECTOR)
             text_box.send_keys(MESSAGE_TO_SEND)
-            time.sleep(4)  # Ensure the message is properly typed
+            time.sleep(8)  # Ensure the message is properly typed
 
             send_button = driver.find_element(By.XPATH, SEND_BUTTON_SELECTOR)
             send_button.click()
-            time.sleep(1)  # Wait for the message to be sent
+            time.sleep(5)  # Wait for the message to be sent
 
             # Update the creator status to "DM"
             update_creator_status(creator_id, "DM", username, link)
