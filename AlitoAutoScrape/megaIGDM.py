@@ -16,7 +16,7 @@ SENT_MESSAGE_SELECTOR = 'span.x1lliihq.x193iq5w.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft
 
 # Function to fetch creators with "instagram.com" in their link and status not "IGDM"
 def fetch_instagram_creators():
-    response = requests.get('https://blitz-backend-nine.vercel.app/crm/creator/creators')
+    response = requests.get('https://blitz-backend-nine.vercel.app/api/crm/creator/creators')
     if response.status_code == 200:
         creators = response.json()
         instagram_creators = [creator for creator in creators if 'instagram.com' in creator['link'] and creator['status'] != 'IGDM']
@@ -30,7 +30,7 @@ def update_creator_status(creator_id, status, username, link=None):
     data = {'id': creator_id, 'status': status, 'username': username}
     if link:
         data['link'] = link
-    response = requests.post('https://blitz-backend-nine.vercel.app/crm/creator/update', json=data)
+    response = requests.post('https://blitz-backend-nine.vercel.app/api/crm/creator/update', json=data)
     if response.status_code == 200:
         print(f"Creator ID {creator_id} status updated to {status}")
     else:

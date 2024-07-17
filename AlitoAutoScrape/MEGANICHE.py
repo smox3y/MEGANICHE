@@ -17,7 +17,7 @@ import os
 
 # Function to fetch creators
 def fetch_creators():
-    response = requests.get('https://blitz-backend-nine.vercel.app/crm/creator/creators')
+    response = requests.get('https://blitz-backend-nine.vercel.app/api/crm/creator/creators')
     if response.status_code == 200:
         return response.json()
     else:
@@ -27,7 +27,7 @@ def fetch_creators():
 # Function to add creator
 def add_creator(creator_data):
     print("Attempting to add creator with data:", creator_data)  # Log the request data
-    response = requests.post('https://blitz-backend-nine.vercel.app/crm/creator/add', json=creator_data)
+    response = requests.post('https://blitz-backend-nine.vercel.app/api/crm/creator/add', json=creator_data)
     if response.status_code == 200:
         print("Creator added successfully")
     else:
