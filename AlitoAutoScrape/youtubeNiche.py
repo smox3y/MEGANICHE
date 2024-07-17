@@ -49,16 +49,15 @@ def fetch_account_data(driver, username):
         # Click the "more" button if it exists
         try:
             more_button = driver.find_element(By.XPATH, '//button[contains(@class, "truncated-text-wiz__inline-button")]')
-            if more_button:
-                more_button.click()
-                time.sleep(2)
+            driver.execute_script("arguments[0].click();", more_button)
+            time.sleep(2)
         except NoSuchElementException:
             print(f"No 'more' button found for {username}")
 
         # Extract account data
-        title = driver.find_element(By.CSS_SELECTOR, 'yt-formatted-string#text').text
-        subscriber_count = driver.find_element(By.CSS_SELECTOR, 'yt-formatted-string#subscriber-count').text
-        description = driver.find_element(By.CSS_SELECTOR, 'yt-attributed-string#description-container').text
+        title = driver.find_element(By.XPATH, '//yt-dynamic-text-view-model//h1').text
+        subscriber_count = driver.find_element(By.XPATH, '//yt-content-metadata-view-model//span[contains(text(),"subscribers")]').text
+        description = driver.find_element(By.XPATH, '//yt-attributed-string[@id="description-container"]').text
 
         subscriber_count = re.sub(r'\D', '', subscriber_count)
         email_matches = re.findall(r'[\w\.-]+@[\w\.-]+', description)
