@@ -69,6 +69,16 @@ def scrolling_function(driver, target_username_count=20, max_scroll_attempts=100
     return list(usernames)
 
 # Function to fetch account data for a username
+def style_num_to_float(value):
+    if 'B' in value:
+        return float(value.replace('B', '')) * 1000000000
+    if 'M' in value:
+        return float(value.replace('M', '')) * 1000000
+    elif 'K' in value:
+        return float(value.replace('K', '')) * 1000
+    else:
+        return float(value)
+
 def fetch_account_data(driver, username):
     print(f"Trying to fetch account data for: {username}")
     account_url = f"https://www.youtube.com/{username}/about"
@@ -86,10 +96,13 @@ def fetch_account_data(driver, username):
 
         # Extract account data
         title = driver.find_element(By.XPATH, '//yt-dynamic-text-view-model//h1').text
-        subscriber_count = driver.find_element(By.XPATH, '//yt-content-metadata-view-model//span[contains(text(),"subscribers")]').text
+        subscriber_count_text = driver.find_element(By.XPATH, '//yt-content-metadata-view-model//span[contains(text(),"subscribers")]').text
         description = driver.find_element(By.XPATH, '//yt-attributed-string[@id="description-container"]').text
 
-        subscriber_count = re.sub(r'\D', '', subscriber_count)
+        # Convert subscriber count to float
+        subscriber_count = re.sub(r'\D', '', subscriber_count_text)
+        following = int(style_num_to_float(subscriber_count_text))
+
         email_matches = re.findall(r'[\w\.-]+@[\w\.-]+', description)
         email = email_matches[0] if email_matches else None
 
@@ -97,7 +110,7 @@ def fetch_account_data(driver, username):
             'link': account_url,
             'username': username,
             'title': title,
-            'subscribers': int(subscriber_count) if subscriber_count.isdigit() else 0,
+            'following': following,
             'description': description,
             'email': email
         }
