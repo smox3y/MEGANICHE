@@ -4,7 +4,37 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from datetime import date
+import requests
 import re
+
+# Function to fetch existing creators from BlitzPay
+def fetch_creators():
+    response = requests.get('https://blitz-backend-nine.vercel.app/api/crm/creator/creators')
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Failed to fetch creators")
+        return []
+
+# Function to add a new creator to BlitzPay
+def add_creator(creator_data):
+    print("Attempting to add creator with data:", creator_data)
+    response = requests.post('https://blitz-backend-nine.vercel.app/api/crm/creator/add', json=creator_data)
+    if response.status_code == 200:
+        print("Creator added successfully")
+    else:
+        print("Failed to add creator. Response:", response.text)
+
+# Function to convert styled numbers to float
+def style_num_to_float(value):
+    if 'B' in value:
+        return float(value.replace('B', '')) * 1000000000
+    if 'M' in value:
+        return float(value.replace('M', '')) * 1000000
+    elif 'K' in value:
+        return float(value.replace('K', '')) * 1000
+    else:
+        return float(value)
 
 # Function to scroll and collect YouTube usernames
 def scrolling_function(driver, target_username_count=20, max_scroll_attempts=100):
@@ -61,9 +91,10 @@ def fetch_account_data(driver, username):
 
         subscriber_count = re.sub(r'\D', '', subscriber_count)
         email_matches = re.findall(r'[\w\.-]+@[\w\.-]+', description)
-        email = email_matches[0] if email_matches else 'N/A'
+        email = email_matches[0] if email_matches else None
 
         return {
+            'link': account_url,
             'username': username,
             'title': title,
             'subscribers': int(subscriber_count) if subscriber_count.isdigit() else 0,
@@ -74,7 +105,7 @@ def fetch_account_data(driver, username):
         print(f"Error fetching data for {username}: {e}")
         return None
 
-# Main function
+# Main function to process and add creators
 def main(driver):
     search_term = input("Enter a search term for YouTube: ")
     search_url = f"https://www.youtube.com/results?search_query={search_term.replace(' ', '+')}"
@@ -87,10 +118,14 @@ def main(driver):
 
     if usernames:
         print("Fetching account data...")
+        creators = fetch_creators()
+        existing_emails = [creator['email'] for creator in creators if creator['email']]
         account_data_list = []
+
         for username in usernames:
             account_data = fetch_account_data(driver, username)
-            if account_data:
+            if account_data and (account_data['email'] is None or account_data['email'] not in existing_emails):
+                add_creator(account_data)
                 account_data_list.append(account_data)
 
         for account_data in account_data_list:
