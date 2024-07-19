@@ -105,19 +105,18 @@ def fetch_account_data(driver, username):
         print(f"Error fetching data for {username}: {e}")
         return None
 
-# Main function to process and add creators
-def main(driver):
-    search_term = input("Enter a search term for YouTube: ")
+# Main function to process and add creators for a single search term
+def process_search_term(driver, search_term):
     search_url = f"https://www.youtube.com/results?search_query={search_term.replace(' ', '+')}"
     driver.get(search_url)
     time.sleep(3)
 
-    print("Collecting YouTube usernames...")
+    print(f"Collecting YouTube usernames for search term: {search_term}...")
     usernames = scrolling_function(driver, target_username_count=20, max_scroll_attempts=20)
-    print(f"Collected {len(usernames)} unique usernames.")
+    print(f"Collected {len(usernames)} unique usernames for search term: {search_term}.")
 
     if usernames:
-        print("Fetching account data...")
+        print(f"Fetching account data for search term: {search_term}...")
         creators = fetch_creators()
         existing_emails = [creator['email'] for creator in creators if creator['email']]
         account_data_list = []
@@ -131,7 +130,7 @@ def main(driver):
         for account_data in account_data_list:
             print(account_data)
     else:
-        print("No usernames collected. Consider increasing scroll attempts or checking the selectors.")
+        print(f"No usernames collected for search term: {search_term}. Consider increasing scroll attempts or checking the selectors.")
 
 # Start the script
 if __name__ == "__main__":
@@ -153,7 +152,21 @@ if __name__ == "__main__":
     print("WebDriver started.")
 
     try:
-        main(driver)
+        search_terms = []
+        print("Enter up to 5 search terms. Press Enter without typing anything to finish input.")
+
+        for i in range(5):
+            term = input(f"Enter search term {i+1}: ")
+            if term:
+                search_terms.append(term)
+            else:
+                break
+
+        for search_term in search_terms:
+            process_search_term(driver, search_term)
+            time.sleep(5)  # Adding a delay between search term processing for better stability
+
     except KeyboardInterrupt:
         print("Script interrupted by user. Closing WebDriver.")
+    finally:
         driver.quit()
