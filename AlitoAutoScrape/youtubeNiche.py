@@ -70,6 +70,8 @@ def scrolling_function(driver, target_username_count=20, max_scroll_attempts=100
 
 # Function to fetch account data for a username
 def style_num_to_float(value):
+    # Remove any non-numeric characters except for 'K', 'M', 'B', '.', and ','
+    value = re.sub(r'[^\d.KMB]', '', value)
     if 'B' in value:
         return float(value.replace('B', '')) * 1000000000
     if 'M' in value:
