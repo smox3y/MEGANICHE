@@ -41,7 +41,7 @@ def style_num_to_float(value):
     else:
         return float(value)
 
-# Function to scroll and collect TikTok links
+# Function to scroll and collect TikTok links by clicking the next button
 def scrolling_function(driver, target_count=20, max_scrolls=2000, max_time=2000):
     scroll_count = 0
     start_time = time.time()
@@ -62,8 +62,10 @@ def scrolling_function(driver, target_count=20, max_scrolls=2000, max_time=2000)
                             break
                 except NoSuchElementException:
                     print("No influencer link found in this item.")
-            time.sleep(1)
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            
+            # Click the next button to go to the next video
+            next_button = driver.find_element(By.CSS_SELECTOR, 'button[data-e2e="arrow-right"]')
+            driver.execute_script("arguments[0].click();", next_button)
             time.sleep(3)
             scroll_count += 1
     except Exception as e:
@@ -151,6 +153,11 @@ def main(driver, hashtags):
                 driver.get(f"https://www.tiktok.com/tag/{hashtag}")
                 time.sleep(5)
 
+                # Click on the first video container
+                first_video = driver.find_element(By.CSS_SELECTOR, 'div[data-e2e="challenge-item"]')
+                first_video.click()
+                time.sleep(5)
+
                 influencer_links = []
 
                 driver, influencer_links = scrolling_function(driver, target_count=20)
@@ -175,7 +182,7 @@ if __name__ == "__main__":
     options.add_argument("--disable-notifications")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-   # options.add_argument("--headless=new")  # Run in headless mode
+    # options.add_argument("--headless=new")  # Run in headless mode
 
     driver = uc.Chrome(options=options)
     print("WebDriver started and navigated to TikTok.")
