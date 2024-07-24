@@ -161,7 +161,7 @@ if __name__ == "__main__":
     options.add_argument("--disable-notifications")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    # options.add_argument("--headless=new")  # Run in headless mode
+    options.add_argument("--headless=new")  # Run in headless mode
 
     driver = uc.Chrome(options=options)
     print("WebDriver started.")
