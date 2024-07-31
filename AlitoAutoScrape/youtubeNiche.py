@@ -27,6 +27,8 @@ def add_creator(creator_data):
 
 # Function to convert styled numbers to float
 def style_num_to_float(value):
+    # Remove any non-numeric characters except for 'K', 'M', 'B', '.', and ','
+    value = re.sub(r'[^\d.KMB]', '', value)
     if 'B' in value:
         return float(value.replace('B', '')) * 1000000000
     if 'M' in value:
@@ -69,18 +71,6 @@ def scrolling_function(driver, target_username_count=20, max_scroll_attempts=100
     return list(usernames)
 
 # Function to fetch account data for a username
-def style_num_to_float(value):
-    # Remove any non-numeric characters except for 'K', 'M', 'B', '.', and ','
-    value = re.sub(r'[^\d.KMB]', '', value)
-    if 'B' in value:
-        return float(value.replace('B', '')) * 1000000000
-    if 'M' in value:
-        return float(value.replace('M', '')) * 1000000
-    elif 'K' in value:
-        return float(value.replace('K', '')) * 1000
-    else:
-        return float(value)
-
 def fetch_account_data(driver, username):
     print(f"Trying to fetch account data for: {username}")
     account_url = f"https://www.youtube.com/{username}/about"
@@ -180,6 +170,10 @@ if __name__ == "__main__":
         for search_term in search_terms:
             process_search_term(driver, search_term)
             time.sleep(5)  # Adding a delay between search term processing for better stability
+            # Clear local arrays and data
+            usernames = []
+            creators = []
+            account_data_list = []
 
     except KeyboardInterrupt:
         print("Script interrupted by user. Closing WebDriver.")

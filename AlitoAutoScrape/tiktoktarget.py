@@ -140,7 +140,6 @@ def influencer_function(driver, links):
         df_new = pd.DataFrame(list_items)
         df_new.to_csv('TIKTOKTARGET_Data.csv', mode='a', index=False, header=not os.path.exists('TIKTOKTARGET_Data.csv'))
         print("Appended to CSV!")
-        driver.get("https://www.tiktok.com/foryou")
     else:
         print("No new items to append.")
 
@@ -163,6 +162,11 @@ def main(driver, hashtags):
                 driver, influencer_links = scrolling_function(driver, target_count=20)
                 print(f"Collected {len(influencer_links)} unique influencer links for hashtag: {hashtag}.")
                 influencer_function(driver, influencer_links)
+
+                # Clear local arrays and reinitialize the loop
+                influencer_links.clear()
+                print("Cleared local arrays and ready for the next search term.")
+                driver.get("https://www.tiktok.com")
 
         except Exception as e:
             print(f"Error occurred: {e}")
