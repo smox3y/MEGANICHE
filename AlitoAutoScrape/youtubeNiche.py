@@ -98,6 +98,18 @@ def fetch_account_data(driver, username):
         email_matches = re.findall(r'[\w\.-]+@[\w\.-]+', description)
         email = email_matches[0] if email_matches else None
 
+        # Check location
+        location = None
+        try:
+            location_element = driver.find_element(By.XPATH, '//tr[@class="description-item style-scope ytd-about-channel-renderer"]//td[@class="style-scope ytd-about-channel-renderer"][2]')
+            location = location_element.text
+        except NoSuchElementException:
+            print(f"No location found for {username}")
+
+        if location in ["India", "Pakistan", "Thailand"]:
+            print(f"Skipping creator from {location}")
+            return None
+
         return {
             'link': account_url,
             'username': username,
