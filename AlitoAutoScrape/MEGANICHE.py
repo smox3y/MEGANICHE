@@ -35,14 +35,21 @@ def add_creator(creator_data):
 
 # Function to convert styled numbers to float
 def style_num_to_float(value):
-    if 'B' in value:
-        return float(value.replace('B', '')) * 1000000000
-    if 'M' in value:
-        return float(value.replace('M', '')) * 1000000
-    elif 'K' in value:
-        return float(value.replace('K', '')) * 1000
-    else:
-        return float(value)
+    if not value or value.strip() == '':
+        return 0.0  # Return 0.0 or any default value when the input is empty or invalid
+    try:
+        if 'B' in value:
+            return float(value.replace('B', '')) * 1000000000
+        if 'M' in value:
+            return float(value.replace('M', '')) * 1000000
+        elif 'K' in value:
+            return float(value.replace('K', '')) * 1000
+        else:
+            return float(value)
+    except ValueError:
+        print(f"ValueError: Could not convert {value} to float.")
+        return 0.0  # Return 0.0 or any default value when conversion fails
+
 
 # Scrolling function to collect influencer links
 def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
@@ -100,9 +107,9 @@ def influencer_function(driver, links):
         driver.switch_to.window(driver.window_handles[-1])
         
         try:
-            userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-1s5lw4c-H2ShareDesc')
+            userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-cm3m4u-H2ShareDesc')
             userbio_text = userbio_element.text
-            name_element = driver.find_element(By.CSS_SELECTOR, '.css-1nbnul7-DivShareTitleContainer .css-10pb43i-H2ShareSubTitle')
+            name_element = driver.find_element(By.CSS_SELECTOR, '.css-11ay367-H1ShareTitle')
             name_text = name_element.text
             followers_element = driver.find_element(By.CSS_SELECTOR, '[title="Followers"]')
             followers_text = followers_element.text
