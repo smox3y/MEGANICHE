@@ -1,5 +1,3 @@
-#meganiche.py
-
 import time
 import random
 import logging
@@ -50,16 +48,13 @@ def style_num_to_float(value):
         print(f"ValueError: Could not convert {value} to float.")
         return 0.0  # Return 0.0 or any default value when conversion fails
 
-
-# Scrolling function to collect influencer links
-def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
-    scroll_count = 0
-    start_time = time.time()
+# Scrolling function to collect influencer links endlessly
+def scrolling_function(driver):
     influencer_links = []
 
     try:
         print('Starting scroll function')
-        while len(influencer_links) < 30 and scroll_count < max_scrolls and time.time() - start_time < max_time:
+        while True:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')))
             video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')
@@ -71,17 +66,18 @@ def scrolling_function(driver, max_scrolls=200000, max_time=2000000):
                     if influ_url not in influencer_links:
                         influencer_links.append(influ_url)
                         print("Found influencer URL:", influ_url)
+                        if len(influencer_links) >= 7:
+                            print(f"{len(influencer_links)} Influencer Links have been collected, executing influencer_function.")
+                            influencer_function(driver, influencer_links)
+                            influencer_links = []  # Reset the list after processing
                 except NoSuchElementException:
                     print("No 'avatar-anchor' link found in this item.")
             time.sleep(1)
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # Scroll multiple times to ensure new content loads
+            for _ in range(3):
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(1)
             time.sleep(5)
-            scroll_count += 1
-        if len(influencer_links) >= 7:
-            print(f"{len(influencer_links)} Influencer Links have been collected, executing influencer_function.")
-            influencer_function(driver, influencer_links)
-        else:
-            print("Maximum scrolls or time reached without collecting enough links.")
     except Exception as e:
         print(f'Error occurred in scrolling function: {e}')
     return driver, influencer_links
@@ -160,19 +156,11 @@ def influencer_function(driver, links):
 
 # Main function
 def main(driver):
-    while True:
-        try:
-            print("Starting scrolling...")
-            driver, influencer_links = scrolling_function(driver, max_scrolls=2000, max_time=200000)
-            if influencer_links:
-                print("Processing influencer links...")
-            else:
-                print("No new influencer links found. Restarting scrolling...")
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                scrolling_function(driver, max_scrolls=20000, max_time=200000)
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            break
+    try:
+        print("Starting scrolling...")
+        driver, influencer_links = scrolling_function(driver)
+    except Exception as e:
+        print(f"Error occurred: {e}")
 
 # Start the script
 if __name__ == "__main__":
