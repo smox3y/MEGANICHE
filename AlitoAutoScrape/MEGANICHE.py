@@ -5,13 +5,13 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
 from datetime import date
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import re
 import os
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 # Function to fetch creators
 def fetch_creators():
@@ -49,15 +49,35 @@ def style_num_to_float(value):
         return 0.0  # Return 0.0 or any default value when conversion fails
 
 # Scrolling function to collect influencer links endlessly
+import time
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+
 def scrolling_function(driver):
     influencer_links = []
+    print('Starting scroll function')
+    
+    while len(influencer_links) < 7:
+        try:
+            # Try to click "Continue as guest" if it exists
+            try:
+                continue_as_guest = driver.find_element(By.XPATH, "//div[@role='link' and @data-e2e='channel-item' and contains(text(), 'Continue as guest')]")
+                continue_as_guest.click()
+                print("Clicked on 'Continue as guest'.")
+                time.sleep(2)
+            except NoSuchElementException:
+                # Element not found, so skip this step
+                pass
 
-    try:
-        print('Starting scroll function')
-        while True:
+            # Scroll to the bottom of the page
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')))
+            time.sleep(2)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+            # Find influencer containers after scrolling
             video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+            # Process each influencer container
             for container in video_containers:
                 try:
                     anchor = container.find_element(By.CSS_SELECTOR, 'a.e1g2yhv81.css-fz9tz3-StyledLink-StyledAuthorAnchor.er1vbsz0')
@@ -66,20 +86,31 @@ def scrolling_function(driver):
                     if influ_url not in influencer_links:
                         influencer_links.append(influ_url)
                         print("Found influencer URL:", influ_url)
+
+                        # Check if we have enough links
                         if len(influencer_links) >= 7:
-                            print(f"{len(influencer_links)} Influencer Links have been collected, executing influencer_function.")
                             influencer_function(driver, influencer_links)
-                            influencer_links = []  # Reset the list after processing
-                except NoSuchElementException:
-                    print("No 'avatar-anchor' link found in this item.")
-            time.sleep(1)
-            # Scroll multiple times to ensure new content loads
-            for _ in range(3):
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                time.sleep(1)
-            time.sleep(5)
-    except Exception as e:
-        print(f'Error occurred in scrolling function: {e}')
+                            influencer_links = []  # Reset list after processing
+                            break  # Exit loop to refresh page
+                        
+                except StaleElementReferenceException:
+                    print("Stale element reference error encountered. Skipping this element.")
+                    continue  # Skip to the next container
+                except Exception as e:
+                    print(f"Error processing container: {e}")
+                    continue
+
+            # Refresh the page every 5 seconds if the target number of links hasn't been reached
+            if len(influencer_links) < 7:
+                driver.refresh()
+                time.sleep(5)  # Wait 5 seconds before scrolling again
+                driver.execute_script("window.scrollTo(0, 0);")
+                print("Page refreshed, starting scroll again.")
+                
+        except Exception as e:
+            print(f'Error occurred in scrolling function: {e}')
+            break  # Exit loop if there's a major error
+
     return driver, influencer_links
 
 # Function to fetch TikTok data
@@ -101,6 +132,16 @@ def influencer_function(driver, links):
         driver.execute_script("window.open('{}');".format(page))
         time.sleep(5)
         driver.switch_to.window(driver.window_handles[-1])
+        
+        # Check for the "Continue as guest" element
+        try:
+            continue_as_guest = driver.find_element(By.XPATH, "//div[@role='link' and @data-e2e='channel-item' and contains(text(), 'Continue as guest')]")
+            continue_as_guest.click()
+            print("Clicked on 'Continue as guest'.")
+            time.sleep(2)  # Add a short delay after clicking
+        except NoSuchElementException:
+            # Element not found, continue as normal
+            pass
         
         try:
             userbio_element = driver.find_element(By.CSS_SELECTOR, '.css-cm3m4u-H2ShareDesc')
@@ -153,6 +194,7 @@ def influencer_function(driver, links):
         driver.get("https://www.tiktok.com/foryou")
     else:
         print("No new items to append.")
+
 
 # Main function
 def main(driver):
