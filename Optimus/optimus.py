@@ -7,6 +7,7 @@ import random
 scripts = [
     "megaIG.py",      # Instagram Script
     "MEGANICHE.py",   # TikTok Script 1
+    "megaIGDM.py",      # Instagram Script
     "ytoutreach.py"   # YouTube Reels Script
 ]
 
