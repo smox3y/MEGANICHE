@@ -79,7 +79,7 @@ def scrolling_function(driver):
             # Process each influencer container
             for container in video_containers:
                 try:
-                    anchor = container.find_element(By.CSS_SELECTOR, 'a.e1g2yhv81.css-vfiwne-StyledLink-StyledAuthorAnchor.er1vbsz0')
+                    anchor = container.find_element(By.CSS_SELECTOR, 'a.e1g2yhv81.css-qvpt8d-StyledAuthorAnchor.e1g2yhv81')
                     influ_url_full = anchor.get_attribute('href').split('?')[0]
                     influ_url = '/'.join(influ_url_full.split('/')[:4]) + '/' if len(influ_url_full.split('/')) >= 4 else influ_url_full
                     if influ_url not in influencer_links:
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     options.add_argument("--disable-notifications")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    options.add_argument("--headless=new")  # Run in headless mode
+    #options.add_argument("--headless=new")  # Run in headless mode
 
     driver = uc.Chrome(options=options)
     driver.get("https://www.tiktok.com/foryou")
