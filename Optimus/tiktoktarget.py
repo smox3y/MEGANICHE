@@ -1,4 +1,5 @@
 import time
+import random
 import logging
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -191,14 +192,17 @@ if __name__ == "__main__":
     driver = uc.Chrome(options=options)
     print("WebDriver started and navigated to TikTok.")
 
-    hashtags = []
-    print("Enter up to 5 hashtags. Press Enter without typing anything to finish input.")
-    for i in range(5):
-        hashtag = input(f"Enter hashtag {i+1}: ")
-        if hashtag:
-            hashtags.append(hashtag)
-        else:
-            break
+    # Static bank of hashtags
+    HASHTAG_BANK = [
+        "foryou", "viral", "trending", "funny", "dance", 
+        "comedy", "fashion", "food", "fitness", "beauty", 
+        "travel", "lifehacks", "music", "art", "education", 
+        "pets", "sports", "gaming", "motivation", "technology"
+    ]
+
+    # Randomly select 5 hashtags
+    hashtags = random.sample(HASHTAG_BANK, 5)
+    print(f"Selected hashtags for this run: {hashtags}")
 
     main(driver, hashtags)
     driver.quit()

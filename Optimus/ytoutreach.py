@@ -1,4 +1,5 @@
 import time
+import random
 import logging
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -27,7 +28,6 @@ def add_creator(creator_data):
 
 # Function to convert styled numbers to float
 def style_num_to_float(value):
-    # Remove any non-numeric characters except for 'K', 'M', 'B', '.', and ','
     value = re.sub(r'[^\d.KMB]', '', value)
     if 'B' in value:
         return float(value.replace('B', '')) * 1000000000
@@ -168,24 +168,22 @@ if __name__ == "__main__":
     driver = uc.Chrome(options=options)
     print("WebDriver started.")
 
+    # Static search term bank
+    SEARCH_TERM_BANK = [
+        "fitness", "technology", "cooking", "travel", "music", 
+        "gaming", "education", "comedy", "news", "lifestyle", 
+        "health", "fashion", "sports", "motivation", "business", 
+        "DIY", "reviews", "history", "science", "art", "college", "fortnite", "tech review", "unboxing"
+    ]
+
+    # Randomly select 5 search terms
+    search_terms = random.sample(SEARCH_TERM_BANK, 5)
+    print(f"Selected search terms for this run: {search_terms}")
+
     try:
-        search_terms = []
-        print("Enter up to 5 search terms. Press Enter without typing anything to finish input.")
-
-        for i in range(5):
-            term = input(f"Enter search term {i+1}: ")
-            if term:
-                search_terms.append(term)
-            else:
-                break
-
         for search_term in search_terms:
             process_search_term(driver, search_term)
-            time.sleep(5)  # Adding a delay between search term processing for better stability
-            # Clear local arrays and data
-            usernames = []
-            creators = []
-            account_data_list = []
+            time.sleep(5)
 
     except KeyboardInterrupt:
         print("Script interrupted by user. Closing WebDriver.")

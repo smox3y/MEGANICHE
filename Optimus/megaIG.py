@@ -3,11 +3,18 @@ import logging
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementClickInterceptedException
 from datetime import date
 import requests
 from bs4 import BeautifulSoup
 import re
+
+# Login credentials
+credentials = [
+    {"username": "xisalvador13", "password": "Resistance5"},
+    {"username": "useblitz.co", "password": "Resistance5"},
+    {"username": "iseeoneworld", "password": "#Oikrtd90"}
+]
 
 # Function to fetch existing creators from BlitzPay
 def fetch_creators():
@@ -135,9 +142,50 @@ def influencer_function(driver, links):
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
 
+# Function to log in to Instagram
+def login_to_instagram(driver, credentials):
+    driver.get("https://www.instagram.com/accounts/login/")
+    time.sleep(5)  # Allow page to load
+    
+    for cred in credentials:
+        try:
+            # Locate and fill username
+            username_input = driver.find_element(By.CSS_SELECTOR, 'input[name="username"]')
+            username_input.clear()
+            username_input.send_keys(cred["username"])
+
+            # Locate and fill password
+            password_input = driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
+            password_input.clear()
+            password_input.send_keys(cred["password"])
+
+            # Click login button
+            login_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
+            login_button.click()
+
+            time.sleep(15)  # Wait for potential login success
+            
+            if "instagram.com" in driver.current_url and "/accounts/login/" not in driver.current_url:
+                print(f"Successfully logged in as {cred['username']}")
+                return True
+
+        except Exception as e:
+            print(f"Login attempt failed for {cred['username']}: {e}")
+
+    print("All login attempts failed.")
+    return False
+
 # Main function
 def main(driver):
-    print("Collecting influencer links...")
+    if not login_to_instagram(driver, credentials):
+        print("Failed to log in. Exiting script.")
+        driver.quit()
+        return
+
+    print("Navigating to Instagram Reels...")
+    driver.get("https://www.instagram.com/reels/")
+    time.sleep(5)
+
     influencer_links = scrolling_function(driver, target_link_count=30, max_scroll_attempts=20)
     print(f"Collected {len(influencer_links)} influencer links.")
 
@@ -161,16 +209,11 @@ if __name__ == "__main__":
     options.add_argument("--disable-notifications")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-   # options.add_argument("--headless=new")  # Run in headless mode
+    options.add_argument("--headless=new")  # Run in headless mode
 
     driver = uc.Chrome(options=options)
-    driver.get("https://www.instagram.com/reels")
-    print("WebDriver started and navigated to Instagram Reels.")
-
     try:
-        while True:
-            main(driver)
-            time.sleep(5)
+        main(driver)
     except KeyboardInterrupt:
         print("Script interrupted by user. Closing WebDriver.")
         driver.quit()
