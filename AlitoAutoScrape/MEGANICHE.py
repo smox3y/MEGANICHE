@@ -76,11 +76,10 @@ def scrolling_function(driver):
             # Find influencer containers after scrolling
             video_containers = driver.find_elements(By.CSS_SELECTOR, 'div.css-1mnwhn0-DivAuthorContainer')
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
             # Process each influencer container
             for container in video_containers:
                 try:
-                    anchor = container.find_element(By.CSS_SELECTOR, 'a.e1g2yhv81.css-fz9tz3-StyledLink-StyledAuthorAnchor.er1vbsz0')
+                    anchor = container.find_element(By.CSS_SELECTOR, 'a.e1g2yhv81.css-vfiwne-StyledLink-StyledAuthorAnchor.er1vbsz0')
                     influ_url_full = anchor.get_attribute('href').split('?')[0]
                     influ_url = '/'.join(influ_url_full.split('/')[:4]) + '/' if len(influ_url_full.split('/')) >= 4 else influ_url_full
                     if influ_url not in influencer_links:
