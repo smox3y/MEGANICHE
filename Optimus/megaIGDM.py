@@ -9,7 +9,6 @@ from selenium.common.exceptions import NoSuchElementException
 credentials = [
     {"username": "useblitz.co", "password": "Resistance5"},
     {"username": "thecultureclub_", "password": "#xCultureClubx24*"},
-
     {"username": "iseeoneworld", "password": "#Oikrtd90"}
 ]
 
