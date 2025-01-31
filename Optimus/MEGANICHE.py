@@ -1,3 +1,5 @@
+#MEGANICHE.py
+
 import time
 import random
 import logging
